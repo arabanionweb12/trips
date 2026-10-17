@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Luxor Immersion Retreat, 14–21 December 2026. Explore the week day by day on a 3D map of Luxor: the villa, the itinerary, prices, packing and your questions answered.">
+<meta property="og:title" content="Luxor Immersion Retreat · Arabanion × Meerrmade">
+<meta property="og:description" content="7 nights in a private villa on Luxor's West Bank, learning Egyptian Arabic. 14–21 December 2026.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trips.arabanion.com/luxor/">
+<meta name="theme-color" content="#13204A">
+<title>Luxor Immersion Retreat · Arabanion</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,800&family=Noto+Naskh+Arabic:wght@500;700&display=swap">
+<style>
+/* Layout: a night-lapis "map table" — 3D Luxor on the left, the day's papyrus card on the right; below, the practical sections. Single deliberate look (no theme switch). */
+:root{
+  --night:#13204A; --night2:#1B2D63; --lapis:#1F3C88;
+  --papyrus:#FBF5E8; --sand:#EAD3A2; --ink:#221C16; --mute:#6B5E4E; --line:#E3D2AC;
+  --gold:#E3A82B; --carn:#D9532B; --turq:#16A39A; --turqL:#DDF3F0;
+  --f-display:"Marcellus","Palatino Linotype",Palatino,Georgia,serif;
+  --f-body:"Nunito Sans","Gill Sans","Segoe UI",system-ui,sans-serif;
+  --f-ar:"Noto Naskh Arabic","Geeza Pro","Arial",serif;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{background:var(--night);color:var(--papyrus);font-family:var(--f-body);font-size:15px;line-height:1.55;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--night)}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0}
+a{color:var(--gold)}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* header */
+header.top{padding-block:22px 14px}
+.brand{display:flex;gap:10px;align-items:center;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:800}
+.brand .a{color:var(--gold)} .brand .x{color:#8C97C2} .brand .m{color:var(--papyrus)}
+header.top h1{font-size:clamp(28px,4.4vw,46px);margin-top:6px;color:var(--papyrus)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:8px;color:#C9D0EC;font-size:14px}
+.meta b{color:var(--sand);font-weight:800}
+.hint{color:#9FA9D3;font-size:13px;margin-top:6px}
+
+/* day strip */
+.days{display:flex;gap:6px;overflow-x:auto;padding-block:10px 12px;scrollbar-width:thin}
+.day{flex:0 0 auto;border:1px solid #33478A;background:var(--night2);color:#DCE2F7;border-radius:10px;padding:7px 12px;text-align:left;line-height:1.2;min-width:86px}
+.day small{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#93A0D0;font-weight:800}
+.day span{font-family:var(--f-display);font-size:15px}
+.day[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.day[aria-pressed="true"] small{color:#5A3F0B}
+
+/* stage */
+.stage{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px;align-items:start}
+.mapbox{position:relative;border-radius:16px;overflow:hidden;background:#0E1838;height:min(68vh,640px);min-height:380px;border:1px solid #2A3C7A}
+#scene{position:absolute;inset:0;display:block;width:100%;height:100%;touch-action:none}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.pin{position:absolute;left:0;top:0;pointer-events:auto;transform:translate(-50%,-100%);background:rgba(19,32,74,.86);color:var(--papyrus);border:1px solid #4A5DA0;border-radius:999px;padding:3px 10px 3px 8px;font-size:12px;font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:opacity .3s,background .2s}
+.pin i{width:8px;height:8px;border-radius:50%;background:var(--sand);display:inline-block}
+.pin.on{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+.pin.on i{background:var(--carn)}
+.pin.dim{opacity:.38}
+.pin.home{background:var(--turq);border-color:var(--turq);color:#fff}
+.pin.home i{background:#fff}
+.legend{position:absolute;left:12px;bottom:10px;font-size:11px;color:#AEB8E0;background:rgba(14,24,56,.7);padding:4px 9px;border-radius:8px;pointer-events:none}
+.compass{position:absolute;right:12px;top:12px;font-size:11px;color:#AEB8E0;background:rgba(14,24,56,.7);padding:4px 9px;border-radius:8px;pointer-events:none}
+.place{position:absolute;right:12px;bottom:12px;left:auto;max-width:300px;background:var(--papyrus);color:var(--ink);border-radius:12px;padding:12px 14px 12px;box-shadow:0 10px 30px rgba(0,0,0,.35);font-size:13.5px}
+.place h3{font-size:18px;color:var(--lapis);padding-right:22px}
+.place p{margin:6px 0 0}
+.place .tag{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--carn)}
+.place .x{position:absolute;right:8px;top:6px;background:none;border:0;font-size:20px;color:var(--mute);line-height:1}
+.nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:#C9D0EC}
+
+/* day card */
+.card{background:var(--papyrus);color:var(--ink);border-radius:16px;padding:20px 20px 18px;min-width:0}
+.card .date{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--carn)}
+.card h2{font-size:28px;color:var(--lapis);margin-top:2px}
+.card .lede{color:var(--mute);margin:4px 0 12px}
+.slots{display:grid;gap:8px}
+.slot{display:grid;grid-template-columns:86px minmax(0,1fr);gap:10px;border-top:1px solid var(--line);padding-top:8px}
+.slot b{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--turq);padding-top:2px}
+.slot p{margin:0}
+.phr{margin-top:14px;background:var(--turqL);border-radius:12px;padding:12px 14px}
+.phr h4{margin:0 0 6px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#0E6F69}
+.phr ul{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.phr li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:baseline}
+.phr .ar{font-family:var(--f-ar);font-size:21px;direction:rtl;unicode-bidi:isolate;text-align:right;grid-column:2;grid-row:1 / span 2;color:var(--ink);font-weight:700}
+.phr .tr{font-weight:800;color:#0E6F69;font-size:14px}
+.phr .en{color:var(--mute);font-size:13px}
+.tip{margin-top:12px;font-size:13.5px;color:var(--ink);border-left:3px solid var(--gold);padding-left:10px}
+.nav{display:flex;justify-content:space-between;margin-top:14px;gap:8px}
+.nav button{background:var(--lapis);color:#fff;border:0;border-radius:999px;padding:8px 16px;font-weight:700}
+.nav button:disabled{opacity:.35;cursor:default}
+.play{background:transparent!important;color:var(--lapis)!important;border:1px solid var(--lapis)!important}
+
+/* sections */
+section{padding-block:44px 6px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--gold)}
+section h2{font-size:clamp(26px,3.4vw,36px);color:var(--papyrus);margin-top:4px}
+section .intro{color:#C9D0EC;max-width:66ch;margin:8px 0 18px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.box{background:var(--night2);border:1px solid #2E4185;border-radius:14px;padding:16px;min-width:0}
+.box h3{font-size:19px;color:var(--sand)}
+.box p{margin:6px 0 0;color:#D7DCF0}
+.box ul{margin:8px 0 0;padding-left:18px;color:#D7DCF0}
+.box li{margin:3px 0}
+.paper{background:var(--papyrus);color:var(--ink);border-color:var(--papyrus)}
+.paper h3{color:var(--lapis)} .paper p,.paper ul{color:var(--ink)}
+.btn{display:inline-block;margin-top:12px;background:var(--gold);color:var(--ink);text-decoration:none;font-weight:800;border-radius:999px;padding:8px 16px}
+
+/* villa plan */
+.plan{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.room{background:#26397A;border-radius:10px;padding:10px;font-size:13px;color:#DCE2F7;min-width:0}
+.room b{display:block;font-family:var(--f-display);font-weight:400;font-size:16px;color:var(--papyrus)}
+.room.pool{background:#0F6F7A}.room.roof{background:#7A4A2A}
+
+/* money timeline */
+.price{display:flex;flex-wrap:wrap;gap:12px;align-items:stretch}
+.price .big{font-family:var(--f-display);font-size:44px;color:var(--gold);line-height:1}
+.split{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.split span{background:#26397A;border-radius:999px;padding:4px 12px;font-size:13px}
+.tl{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.tl li{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;padding:10px 0;border-top:1px solid #2E4185}
+.tl li:first-child{border-top:0}
+.tl .when{font-weight:800;color:var(--sand);font-size:13px;letter-spacing:.04em}
+.tl b{color:var(--papyrus)}
+.refund{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:4px;margin-top:10px}
+.refund div{border-radius:8px;padding:10px;font-size:13px;color:var(--ink)}
+.refund b{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.r1{background:#BFE8C9}.r2{background:#F6D38A}.r3{background:#F3B3A0}
+
+/* packing */
+.pack{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 18px}
+.pack label{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.pack input{margin-top:4px;accent-color:var(--turq);width:17px;height:17px;flex:0 0 auto}
+.pack small{display:block;color:var(--mute);font-size:12.5px}
+.count{font-weight:800;color:var(--turq)}
+
+/* faq */
+.search{width:100%;max-width:520px;border-radius:999px;border:1px solid #3A4E92;background:var(--night2);color:var(--papyrus);padding:10px 16px;font-size:15px}
+.search::placeholder{color:#8F9BC9}
+.faq{display:grid;gap:8px;margin-top:14px}
+details{background:var(--night2);border:1px solid #2E4185;border-radius:12px;padding:0 16px}
+summary{list-style:none;cursor:pointer;padding:13px 26px 13px 0;font-weight:800;color:var(--papyrus);position:relative}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";position:absolute;right:0;top:9px;font-size:22px;color:var(--gold);font-weight:400}
+details[open] summary::after{content:"–"}
+details p{margin:0 0 14px;color:#D7DCF0;max-width:72ch}
+.empty{color:#9FA9D3}
+footer{padding-block:40px 40px;color:#8F9BC9;font-size:13px}
+
+@media (max-width:900px){
+  .stage{grid-template-columns:minmax(0,1fr)}
+  .mapbox{height:58vh;min-height:340px}
+  .grid3{grid-template-columns:minmax(0,1fr)}
+  .plan{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  .grid2,.pack{grid-template-columns:minmax(0,1fr)}
+  .slot{grid-template-columns:minmax(0,1fr);gap:2px}
+  .refund{grid-template-columns:minmax(0,1fr)}
+  .tl li{grid-template-columns:minmax(0,1fr);gap:2px}
+  .place{left:12px;right:12px;max-width:none}
+  .legend{display:none}
+  .pin{font-size:11px;padding:2px 8px 2px 6px}
+  #labels.overview .pin.minor{visibility:hidden}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="a">Arabanion</span><span class="x">×</span><span class="m">Meerrmade</span></div>
+    <h1>Luxor Immersion Retreat</h1>
+    <div class="meta"><span><b>14–21 December 2026</b></span><span>7 nights · Villa Kassar, West Bank</span><span>7 students</span><span>€1,200 all-in on the ground</span></div>
+    <p class="hint">Pick a day to fly to it. Drag to turn the map, pinch or scroll to zoom, tap any place for details.</p>
+  </header>
+
+  <nav class="days" id="days" aria-label="Days of the retreat"></nav>
+
+  <div class="stage">
+    <div class="mapbox" id="mapbox">
+      <canvas id="scene" aria-label="3D map of Luxor showing the day's route"></canvas>
+      <div id="labels"></div>
+      <div class="compass">N ↑ · Nile runs north</div>
+      <div class="legend">Map is a sketch, not to scale</div>
+      <div class="place" id="place" hidden>
+        <button class="x" id="placeX" aria-label="Close">×</button>
+        <div class="tag" id="placeTag"></div>
+        <h3 id="placeName"></h3>
+        <p id="placeText"></p>
+      </div>
+    </div>
+
+    <article class="card" id="card" aria-live="polite"></article>
+  </div>
+
+  <!-- VILLA -->
+  <section id="villa">
+    <div class="eyebrow">Where you'll live</div>
+    <h2>Villa Kassar, El Baeirat</h2>
+    <p class="intro">A private villa on Luxor's West Bank, among the sugarcane fields and close to the tombs. The whole house is ours for the week: no other guests, no hotel lobby. Classes happen here every morning, and dinner is usually on the roof.</p>
+    <div class="grid2">
+      <div class="box">
+        <h3>The house</h3>
+        <div class="plan">
+          <div class="room"><b>6 bedrooms</b>in separate wings</div>
+          <div class="room"><b>4½ baths</b>hot water</div>
+          <div class="room pool"><b>Pool</b>cool in December, sunny by noon</div>
+          <div class="room roof"><b>Rooftop</b>dinners and the mountain view</div>
+        </div>
+        <p style="margin-top:12px">Rated 4.92 out of 5 across 243 stays on Airbnb. Wifi throughout. This is rural Upper Egypt, so short power cuts can happen; a power bank solves it.</p>
+        <a class="btn" href="https://www.airbnb.com/rooms/631796808484798720" target="_blank" rel="noopener">See the real photos on Airbnb</a>
+      </div>
+      <div class="box paper">
+        <h3>Who's in the house</h3>
+        <ul>
+          <li><b>7 students</b>, that's you</li>
+          <li><b>Your Arabic teacher</b>, who lives at the villa with the group all week</li>
+          <li><b>Mohamed</b>, founder of Arabanion, running the week</li>
+          <li><b>Merve</b> (@meerrmade), travelling with the group</li>
+          <li><b>A local coordinator</b> on call for transport, bookings and anything that comes up</li>
+        </ul>
+        <p style="margin-top:10px"><b>Rooms are shared.</b> We are 10 people in 6 bedrooms, so most rooms have two people. We match roommates with you before the trip; tell us if you're coming with a friend or have a preference.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MONEY -->
+  <section id="booking">
+    <div class="eyebrow">Price and dates</div>
+    <h2>How booking works</h2>
+    <p class="intro">One price, nothing hidden on the ground. You pay a deposit to hold your place, the rest a month before we go.</p>
+    <div class="grid3">
+      <div class="box paper">
+        <h3>The price</h3>
+        <div class="price"><div class="big">€1,200</div></div>
+        <div class="split" style="color:#fff"><span>€100 pre-trip intensive course</span><span>€1,100 the retreat</span></div>
+        <p style="margin-top:10px">Includes the villa, every meal, daily Arabic classes, the Egyptologist, every site ticket, the balloon, the felucca, a private minibus all week and Luxor airport transfers.</p>
+        <p style="margin-top:6px;color:var(--mute)">Not included: international flights, your visa, travel insurance, shopping and tips.</p>
+      </div>
+      <div class="box">
+        <h3>Key dates</h3>
+        <ul class="tl">
+          <li><span class="when">When you book</span><span><b>€300 deposit.</b> Holds your bed. Your pre-trip course opens.</span></li>
+          <li><span class="when">Before you fly</span><span><b>Intensive course.</b> Recorded lessons plus live sessions on the Egyptian dialect.</span></li>
+          <li><span class="when">14 Nov 2026</span><span><b>€900 balance due.</b></span></li>
+          <li><span class="when">Mon 14 Dec</span><span><b>Land in Luxor.</b> We collect you whenever you arrive.</span></li>
+          <li><span class="when">Mon 21 Dec</span><span><b>Fly home.</b> Transfer timed to your flight.</span></li>
+        </ul>
+      </div>
+      <div class="box">
+        <h3>If plans change</h3>
+        <p>What you get back if you cancel:</p>
+        <div class="refund">
+          <div class="r1"><b>Up to 14 Nov</b>Everything back except the €100 course</div>
+          <div class="r2"><b>15–29 Nov</b>€550 back</div>
+          <div class="r3"><b>From 30 Nov</b>No refund, but you can give your place to someone else</div>
+        </div>
+        <p style="margin-top:10px">If we ever cancel the retreat, you get 100% back. The €100 course is non-refundable once you have access to it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PACKING -->
+  <section id="pack">
+    <div class="eyebrow">Before you fly</div>
+    <h2>Packing for Luxor in December</h2>
+    <p class="intro">Days are warm and sunny, around 22–24°C. Nights and early mornings are cold, close to 6–8°C, and the balloon goes up before sunrise. Pack layers. Your ticks are saved in this browser only.</p>
+    <div class="box paper">
+      <p style="margin:0 0 6px"><span class="count" id="packCount">0</span> of <span id="packTotal">0</span> packed</p>
+      <ul class="pack" id="packList"></ul>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="eyebrow">Your questions</div>
+    <h2>Questions people ask</h2>
+    <label for="q" class="hint" style="display:block;margin-bottom:6px">Search the answers</label>
+    <input class="search" id="q" type="search" placeholder="Try: visa, room, cancel, food">
+    <div class="faq" id="faqList"></div>
+    <p class="empty" id="faqEmpty" hidden>No answer matches that yet. Message us and we'll add it.</p>
+  </section>
+
+  <footer>
+    Questions not answered here? Message us on Instagram at @arabanion or @meerrmade.<br>
+    Times and visit order can shift a little with weather and opening hours. Every place shown is on the plan.
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+/* ---------------- content ---------------- */
+const riverX = z => 1.5 + 2.5 * Math.sin(z * 0.045);
+
+const PLACES = {
+  airport:  {name:"Luxor Airport", x:40, z:-8, tag:"East Bank", text:"Fly into Luxor (LXR). We meet you at arrivals whenever you land on 14 December. It's about 40 minutes by minibus to the villa."},
+  villa:    {name:"Villa Kassar", x:riverX(8)-6, z:8, tag:"Home all week · West Bank", text:"Our private villa in El Baeirat. Morning classes, the pool, rooftop dinners, and your room for seven nights.", home:true},
+  karnak:   {name:"Karnak Temple", x:riverX(-31)+7, z:-31, tag:"Day 2 · with our Egyptologist", text:"The largest temple complex of ancient Egypt, built and rebuilt over some 2,000 years. Its Great Hypostyle Hall holds 134 giant columns."},
+  luxor:    {name:"Luxor Temple", x:riverX(0)+5.5, z:0, tag:"Day 2 · with our Egyptologist", text:"In the heart of town, built mainly by Amenhotep III and Ramesses II. An avenue of sphinxes once linked it to Karnak, almost 3 km away."},
+  souq:     {name:"Luxor Souq", x:12, z:3, tag:"Day 2 · your first mission", text:"The market street by Luxor Temple: spices, scarves, lanterns, alabaster. Your mission is to buy three things using only Arabic."},
+  valley:   {name:"Valley of the Kings", x:-46, z:-26, tag:"Day 3 · with our Egyptologist", text:"The royal burial valley of the New Kingdom, with more than 60 tombs cut into the mountain. Your ticket covers three tombs of your choice; Tutankhamun's tomb is a separate ticket."},
+  hatshepsut:{name:"Temple of Hatshepsut", x:-36, z:-14, tag:"Day 3", text:"Deir el-Bahari: the terraced temple of Hatshepsut, one of Egypt's few female pharaohs, set against a wall of golden cliffs."},
+  colossi:  {name:"Colossi of Memnon", x:-22, z:3, tag:"Day 3", text:"Two seated statues of Amenhotep III, each about 18 metres tall, that have watched over the fields for 3,400 years."},
+  balloon:  {name:"Balloon field", x:-15, z:-3, tag:"Day 4 · sunrise", text:"We leave the villa before dawn. You lift off as the sun comes up over the East Bank and drift over the temples and fields for about 45 minutes."},
+  felucca:  {name:"Felucca on the Nile", x:riverX(-9), z:-9, tag:"Day 5", text:"A private traditional sailboat for the group. No engine, just wind, the river and a lot of tea."},
+  village:  {name:"West Bank village", x:-13, z:15, tag:"Day 5", text:"A walk through the village lanes and fields near the villa. Greet people, ask questions, and use the Arabic from that morning's class."},
+  museum:   {name:"Luxor Museum", x:riverX(-17)+4.2, z:-17, tag:"Day 6", text:"A calm, beautifully lit museum on the Corniche, filled with statues and treasures found around ancient Thebes."},
+  mummy:    {name:"Mummification Museum", x:riverX(-5)+4, z:-5, tag:"Day 6", text:"A small museum on the riverside explaining how the ancient Egyptians prepared the dead for eternity, tools and all."}
+};
+
+const DAYS = [
+  {d:"Mon 14 Dec", short:"Mon 14", title:"Arrival", lede:"Land, settle in, meet the group.",
+   route:["airport","villa"],
+   slots:[["Daytime","We collect you from Luxor airport whenever you land and drive you to the villa. Choose your room, unpack, rest."],["Evening","Welcome dinner on the roof. Introductions, the plan for the week, and your first Arabic over food."]],
+   phr:[["أهلاً بيكم","ahlan bīkum","Welcome, everyone"],["اسمي …","ismi …","My name is …"],["اتشرّفنا","itsharrafna","Nice to meet you"]],
+   tip:"Wear a warm layer on the flight in. December evenings in Luxor get cold fast."},
+  {d:"Tue 15 Dec", short:"Tue 15", title:"The East Bank", lede:"Two great temples and your first market mission.",
+   route:["villa","karnak","luxor","souq","villa"],
+   slots:[["Class","Greetings, numbers, prices and the verbs you need in a market."],["Afternoon","Karnak and Luxor Temple with our licensed Egyptologist."],["Evening","The souq at dusk. Buy three things, no English allowed."]],
+   phr:[["بكام ده؟","bikām da?","How much is this?"],["غالي أوي","ghāli awi","That's really expensive"],["آخر كلام؟","ākhir kalām?","What's your final price?"]],
+   tip:"Bring small notes in Egyptian pounds for the souq. Bargaining is expected and friendly."},
+  {d:"Wed 16 Dec", short:"Wed 16", title:"The Kings", lede:"Tombs, a queen's temple and two giants.",
+   route:["villa","valley","hatshepsut","colossi","villa"],
+   slots:[["Class","Directions, asking a guide questions, and the past tense for telling stories."],["Afternoon","Valley of the Kings, the Temple of Hatshepsut and the Colossi of Memnon, with the Egyptologist."],["Evening","Free evening at the villa. Easy conversation practice."]],
+   phr:[["فين …؟","fēn …?","Where is …?"],["يمين / شمال","yimīn / shimāl","Right / left"],["على طول","ʿala ṭūl","Straight ahead"]],
+   tip:"Comfortable shoes and a hat. The valley floor is bright and dusty, even in winter."},
+  {d:"Thu 17 Dec", short:"Thu 17", title:"Sunrise", lede:"Up before dawn, then a slow day.",
+   route:["villa","balloon","villa"], dawn:true,
+   slots:[["Dawn","Hot-air balloon over the West Bank as the sun rises. No class today."],["Daytime","Deliberately empty: sleep, the pool, a long lunch."],["Evening","Relaxed Arabic around the dinner table."]],
+   phr:[["صباح الخير","ṣabāḥ il-khēr","Good morning"],["الشمس طالعة","ish-shams ṭalʿa","The sun is coming up"],["جميل جداً","gamīl giddan","Very beautiful"]],
+   tip:"It is cold up there at dawn. Wear your warmest layer, then peel it off by breakfast."},
+  {d:"Fri 18 Dec", short:"Fri 18", title:"The River", lede:"Sail the Nile, walk the village, cook together.",
+   route:["villa","felucca","village","villa"], sail:true,
+   slots:[["Class","Food, family, and describing people and places."],["Afternoon","A private felucca on the Nile, then a walk through a West Bank village."],["Evening","We cook an Egyptian dinner together at the villa."]],
+   phr:[["أنا جعان / جعانة","ana gaʿān / gaʿāna","I'm hungry (m / f)"],["الأكل حلو أوي","il-akl ḥilw awi","The food is really good"],["تسلم إيدك","tislam īdak","Bless your hands (to the cook)"]],
+   tip:"Say “tislam īdak” to whoever cooked. It will make their day."},
+  {d:"Sat 19 Dec", short:"Sat 19", title:"The Museums", lede:"Treasures, mummies and a free night in town.",
+   route:["villa","museum","mummy","villa"],
+   slots:[["Class","Whatever you're still dropping, plus phrases for the museums."],["Afternoon","Luxor Museum and the Mummification Museum."],["Evening","Free evening in town. Try ordering everything in Arabic."]],
+   phr:[["ممكن صورة؟","mumkin ṣūra?","Can I take a photo?"],["مش فاهم، تاني لو سمحت","mish fāhim, tāni law samaḥt","I don't understand, again please"],["ده من إمتى؟","da min imta?","How old is this?"]],
+   tip:"Use “mish fāhim” freely. Asking again is how you learn."},
+  {d:"Sun 20 Dec", short:"Sun 20", title:"The Last Night", lede:"Closing class, a free afternoon, and your speech.",
+   route:["villa"],
+   slots:[["Class","The closing class: getting ready for tonight."],["Afternoon","Free: the pool, a last walk, a nap, packing."],["Evening","Closing dinner. Every one of you stands up and says something in Arabic."]],
+   phr:[["كان أحلى أسبوع","kān aḥla usbūʿ","It was the best week"],["شكراً على كل حاجة","shukran ʿala kull ḥāga","Thank you for everything"],["هتوحشوني","hatwaḥashūni","I'm going to miss you all"]],
+   tip:"Your speech can be three sentences. Everyone will cheer either way."},
+  {d:"Mon 21 Dec", short:"Mon 21", title:"Departure", lede:"A slow morning and goodbyes.",
+   route:["villa","airport"],
+   slots:[["Morning","Breakfast, packing, goodbyes."],["Transfer","Airport transfer timed to your flight."]],
+   phr:[["مع السلامة","maʿa s-salāma","Goodbye"],["إن شاء الله نتقابل تاني","in shāʾ allāh nitʾābil tāni","Hopefully we'll meet again"],["خلّي بالك من نفسك","khalli bālak min nafsak","Take care of yourself"]],
+   tip:"Leave a little room in your bag. Everyone goes home with something from the souq."}
+];
+
+const PACK = [
+  ["Passport","valid for at least 6 months after your trip"],
+  ["Visa for Egypt","e-Visa online, or on arrival for many nationalities"],
+  ["Travel insurance documents","with medical cover; we ask for proof before you fly"],
+  ["A warm jacket or fleece","for cold nights and the dawn balloon"],
+  ["Comfortable walking shoes","temples and tombs mean hours on your feet"],
+  ["Sun hat, sunglasses, sunscreen","the winter sun is still strong"],
+  ["A light scarf","for the village walk, dust and sun"],
+  ["Clothes that cover shoulders and knees","respectful for the village and town"],
+  ["Swimsuit","the pool is there, if you're brave"],
+  ["Power bank and plug adapter","Egypt uses 220V, plug types C and F"],
+  ["Some cash in Egyptian pounds","for the souq and tips; there are ATMs in Luxor"],
+  ["A notebook for class","you'll fill it fast"]
+];
+
+const FAQ = [
+  ["Do I need to speak Arabic already?","No. Beginners are welcome. Your pre-trip intensive course, with recorded lessons and live sessions, prepares you for the Egyptian dialect before you land, and the daily classes in Luxor build on it. If you already speak some Arabic, you'll get more out of every conversation."],
+  ["Will I have my own room?","Most rooms are shared. We're 10 people in 6 bedrooms, so most bedrooms have two people. We match roommates with you before the trip. Tell us if you're coming with a friend or have a preference."],
+  ["Who else is on the trip?","Seven students, your Arabic teacher who lives at the villa with the group, Mohamed from Arabanion, Merve (@meerrmade), and a local coordinator who is on call all week."],
+  ["How much is it and what does it cover?","€1,200 in total: €100 for the pre-trip intensive course and €1,100 for the retreat. It covers seven nights at the villa, all meals, daily Arabic classes, a licensed Egyptologist for two days, every site ticket on the plan, the hot-air balloon, the private felucca, a private minibus all week and your Luxor airport transfers."],
+  ["What isn't included?","Your international flights, your visa, travel insurance, shopping and tips. The Tutankhamun tomb is an extra ticket if you want to see it."],
+  ["How do I pay?","A €300 deposit holds your place, and your pre-trip course opens once it's paid. The €900 balance is due by 14 November 2026. We send you a secure payment link for each."],
+  ["What if I need to cancel?","Cancel on or before 14 November and you get everything back except the €100 course. Between 15 and 29 November you get €550 back. From 30 November there's no refund, but you can transfer your place to someone else. If we cancel the retreat, you get 100% back."],
+  ["Why is the €100 course non-refundable?","Because you keep it. Once you have access to the recorded lessons and live sessions, the course is yours whether or not you travel."],
+  ["Which airport should I fly into?","Luxor (LXR). There are no direct flights from the US, so most people connect through Cairo or a hub like Istanbul. If you fly into Cairo, a domestic flight to Luxor takes about an hour. We collect you from Luxor airport whenever you land on 14 December."],
+  ["Do I need a visa?","Most visitors do. Many nationalities, including US, UK and EU citizens, can get an e-Visa online before travelling or a visa on arrival. Check the current rules and fee for your passport before you book flights."],
+  ["Is travel insurance required?","Yes. Please bring travel insurance with medical cover. We ask for proof before departure."],
+  ["What's the weather like in December?","Sunny and warm in the day, around 22–24°C, and cold at night, close to 6–8°C. The balloon is the coldest moment of the week, so bring a proper warm layer."],
+  ["What about food and dietary needs?","Every meal is included, most of it Egyptian home cooking at the villa, with a couple of dinners out. Tell us about allergies, vegetarian or other needs when you pay your deposit and we'll plan around them."],
+  ["How much class is there?","About two hours each morning at the villa, on five of the seven full days. Each class is built around what you'll do that afternoon, so the temple, the souq or the kitchen becomes your practice."],
+  ["Is Luxor safe for visitors?","Luxor is one of Egypt's main tourist cities and receives visitors all year. You'll travel in a private minibus, with our team and a local coordinator with you all week. Check your own government's travel advice before booking."],
+  ["Is there wifi?","Yes, at the villa. Power cuts of 15 minutes to an hour can happen in rural Upper Egypt, so bring a power bank."],
+  ["Can I arrive early or stay longer?","Usually, yes. Message us and we'll help you plan the extra days, though nights outside 14–21 December aren't covered."],
+  ["What should I wear?","Light layers for the day, a warm layer for evenings and the balloon, and comfortable shoes. For the village and town, clothes that cover shoulders and knees are respectful."]
+];
+
+/* ---------------- UI: days + card ---------------- */
+const daysEl = document.getElementById('days');
+const cardEl = document.getElementById('card');
+let current = 0;
+
+const allBtn = document.createElement('button');
+allBtn.className='day'; allBtn.innerHTML='<small>Overview</small><span>The week</span>';
+allBtn.addEventListener('click',()=>selectDay(-1));
+daysEl.appendChild(allBtn);
+DAYS.forEach((d,i)=>{
+  const b=document.createElement('button'); b.className='day';
+  b.innerHTML=`<small>Day ${i+1} · ${d.short}</small><span>${d.title}</span>`;
+  b.addEventListener('click',()=>selectDay(i)); daysEl.appendChild(b);
+});
+
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+function renderCard(i){
+  if(i<0){
+    cardEl.innerHTML=`<div class="date">14–21 December 2026</div><h2>Your week in Luxor</h2>
+    <p class="lede">Eight days, one house, and a lot of Arabic. Every morning's class prepares you for that afternoon.</p>
+    <div class="slots">${DAYS.map((d,k)=>`<div class="slot"><b>${d.short}</b><p><strong>${esc(d.title)}.</strong> ${esc(d.lede)}</p></div>`).join('')}</div>
+    <div class="tip">Class runs roughly 9:30 to 11:30 at the villa. Nothing is compulsory, but you'll want to be there.</div>
+    <div class="nav"><span></span><button id="startBtn">Start with Day 1 →</button></div>`;
+    document.getElementById('startBtn').onclick=()=>selectDay(0);
+    return;
+  }
+  const d=DAYS[i];
+  cardEl.innerHTML=`<div class="date">Day ${i+1} · ${d.d}</div><h2>${esc(d.title)}</h2><p class="lede">${esc(d.lede)}</p>
+   <div class="slots">${d.slots.map(s=>`<div class="slot"><b>${s[0]}</b><p>${esc(s[1])}</p></div>`).join('')}</div>
+   <div class="phr"><h4>Arabic you'll use today</h4><ul>${d.phr.map(p=>`<li><span class="tr">${esc(p[1])}</span><span class="ar" lang="ar">${esc(p[0])}</span><span class="en">${esc(p[2])}</span></li>`).join('')}</ul></div>
+   <div class="tip">${esc(d.tip)}</div>
+   <div class="nav"><button id="prevBtn" ${i===0?'disabled':''}>← Day ${i}</button><button class="play" id="replay">Replay route</button><button id="nextBtn" ${i===DAYS.length-1?'disabled':''}>Day ${i+2} →</button></div>`;
+  document.getElementById('prevBtn').onclick=()=>selectDay(i-1);
+  document.getElementById('nextBtn').onclick=()=>selectDay(i+1);
+  document.getElementById('replay').onclick=()=>{ if(window.map) map.replay(); };
+}
+
+function selectDay(i){
+  current=i;
+  [...daysEl.children].forEach((b,k)=>b.setAttribute('aria-pressed', String(k===i+1)));
+  const btn=daysEl.children[i+1]; if(btn) btn.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+  renderCard(i);
+  hidePlace();
+  if(window.map) map.showDay(i);
+  try{ history.replaceState(null,'', i<0 ? '#week' : '#day'+(i+1)); }catch(e){}
+}
+
+/* place popup */
+const placeEl=document.getElementById('place');
+function showPlace(id){
+  const p=PLACES[id]; if(!p) return;
+  document.getElementById('placeTag').textContent=p.tag;
+  document.getElementById('placeName').textContent=p.name;
+  document.getElementById('placeText').textContent=p.text;
+  placeEl.hidden=false;
+}
+function hidePlace(){placeEl.hidden=true}
+document.getElementById('placeX').onclick=hidePlace;
+
+/* ---------------- packing ---------------- */
+const packList=document.getElementById('packList');
+let packed={}; try{packed=JSON.parse(localStorage.getItem('luxorPack')||'{}')}catch(e){packed={}}
+PACK.forEach((p,i)=>{
+  const li=document.createElement('li');
+  li.innerHTML=`<label for="pk${i}"><input type="checkbox" id="pk${i}" ${packed[i]?'checked':''}><span>${esc(p[0])}<small>${esc(p[1])}</small></span></label>`;
+  li.querySelector('input').addEventListener('change',e=>{packed[i]=e.target.checked;try{localStorage.setItem('luxorPack',JSON.stringify(packed))}catch(err){}updPack()});
+  packList.appendChild(li);
+});
+function updPack(){document.getElementById('packCount').textContent=Object.values(packed).filter(Boolean).length;document.getElementById('packTotal').textContent=PACK.length}
+updPack();
+
+/* ---------------- faq ---------------- */
+const faqList=document.getElementById('faqList');
+FAQ.forEach(([q,a])=>{const d=document.createElement('details');d.innerHTML=`<summary>${esc(q)}</summary><p>${esc(a)}</p>`;d.dataset.t=(q+' '+a).toLowerCase();faqList.appendChild(d)});
+document.getElementById('q').addEventListener('input',e=>{
+  const t=e.target.value.trim().toLowerCase(); let n=0;
+  [...faqList.children].forEach(d=>{const ok=!t||d.dataset.t.includes(t);d.hidden=!ok;if(ok)n++; if(t&&ok)d.open=true; if(!t)d.open=false;});
+  document.getElementById('faqEmpty').hidden=n>0;
+});
+
+/* ---------------- 3D map ---------------- */
+const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function buildMap(){
+  const canvas=document.getElementById('scene'), box=document.getElementById('mapbox'), labelsEl=document.getElementById('labels');
+  let renderer;
+  try{ renderer=new THREE.WebGLRenderer({canvas,antialias:true}); }catch(e){ throw e; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(40,1,0.5,600);
+  const controls=new THREE.OrbitControls(camera,canvas);
+  controls.enableDamping=true; controls.dampingFactor=0.08;
+  controls.maxPolarAngle=Math.PI*0.44; controls.minDistance=14; controls.maxDistance=170;
+  controls.screenSpacePanning=false;
+
+  // sky + light
+  const skyDay=new THREE.Color('#9CC3E6'), skyDawn=new THREE.Color('#F2A46B');
+  scene.background=skyDay.clone();
+  scene.fog=new THREE.Fog(skyDay.clone(),120,260);
+  const hemi=new THREE.HemisphereLight(0xFFF4DD,0x8A6A3C,0.85); scene.add(hemi);
+  const sun=new THREE.DirectionalLight(0xFFFFFF,0.9); sun.position.set(40,60,20); scene.add(sun);
+
+  // seeded random
+  let seed=7; const rnd=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646};
+  const ss=(a,b,x)=>{let t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t)};
+
+  function height(x,z){
+    const d=Math.abs(x-riverX(z));
+    let h=0;
+    if(d<3.4) h-= (3.4-d)*0.35;
+    const m=ss(-34,-50,x);
+    h+= m*(9+3*Math.sin(z*0.21)+2.2*Math.sin(z*0.07+x*0.35)+1.5*Math.sin(x*0.5));
+    // wadi of the kings
+    const vd=Math.hypot(x+46,z+26); h-= Math.max(0,1-vd/8)*7;
+    // gentle desert swell east
+    h+= ss(22,45,x)*(0.8+0.6*Math.sin(z*0.15));
+    return h;
+  }
+
+  // terrain
+  const W=140,D=100, geo=new THREE.PlaneGeometry(W,D,140,100); geo.rotateX(-Math.PI/2); geo.translate(-8,0,-6);
+  const pos=geo.attributes.position, cols=[];
+  const cSand=new THREE.Color('#E6CC96'), cRock=new THREE.Color('#C7965E'), cRockD=new THREE.Color('#A8744A'),
+        cGreen=new THREE.Color('#6E9A45'), cGreen2=new THREE.Color('#8DB255'), cTown=new THREE.Color('#D9C7A6'), cBank=new THREE.Color('#5F8A3C');
+  for(let i=0;i<pos.count;i++){
+    const x=pos.getX(i), z=pos.getZ(i), y=height(x,z); pos.setY(i,y);
+    const d=Math.abs(x-riverX(z)); let c=cSand.clone();
+    const westGreen = x<riverX(z) && x>-31 + 2*Math.sin(z*0.2);
+    const eastGreen = x>riverX(z) && d<14+3*Math.sin(z*0.13);
+    if(westGreen||eastGreen){ const f=(Math.sin(x*1.3)*Math.sin(z*1.1)>0)?cGreen:cGreen2; c=f.clone(); if(d<4.5)c=cBank.clone(); }
+    const town = x>riverX(z)+2.5 && x<19 && z>-38 && z<9;
+    if(town) c=cTown.clone().lerp(cSand,0.15*rnd());
+    if(x<-30){ c.lerp(cRock, ss(-30,-38,x)); c.lerp(cRockD, ss(-40,-56,x)*0.6); }
+    if(y<-0.4) c=new THREE.Color('#8A7350');
+    cols.push(c.r,c.g,c.b);
+  }
+  geo.setAttribute('color',new THREE.Float32BufferAttribute(cols,3)); geo.computeVertexNormals();
+  scene.add(new THREE.Mesh(geo,new THREE.MeshLambertMaterial({vertexColors:true})));
+
+  // river
+  const left=[],right=[];
+  for(let z=-56;z<=44;z+=1){left.push(new THREE.Vector2(riverX(z)-2.9,z));right.push(new THREE.Vector2(riverX(z)+2.9,z));}
+  const shp=new THREE.Shape([...left,...right.reverse()]);
+  const rg=new THREE.ShapeGeometry(shp); rg.rotateX(Math.PI/2);
+  const water=new THREE.Mesh(rg,new THREE.MeshPhongMaterial({color:0x2A78A8,emissive:0x041A30,shininess:60,side:THREE.DoubleSide}));
+  water.position.y=-0.15; scene.add(water);
+  // bridge
+  const br=new THREE.Mesh(new THREE.BoxGeometry(9,0.5,1.2),new THREE.MeshLambertMaterial({color:0xD8D2C4}));
+  br.position.set(riverX(30),0.5,30); scene.add(br);
+
+  const M=(c)=>new THREE.MeshLambertMaterial({color:c});
+  const stone=M(0xE2C58E), stoneD=M(0xC9A56B), white=M(0xF7F1E3), dark=M(0x4A3A2A);
+  const at=(id)=>{const p=PLACES[id];return new THREE.Vector3(p.x,height(p.x,p.z),p.z)};
+  const add=(mesh,x,y,z)=>{mesh.position.set(x,y,z);return mesh};
+
+  function temple(big){
+    const g=new THREE.Group(), s=big?1.4:1;
+    const pyl=new THREE.CylinderGeometry(1.2*s,1.6*s,3.2*s,4); pyl.rotateY(Math.PI/4);
+    g.add(add(new THREE.Mesh(pyl,stone),-1.9*s,1.6*s,0)); g.add(add(new THREE.Mesh(pyl,stone),1.9*s,1.6*s,0));
+    const col=new THREE.CylinderGeometry(0.28*s,0.3*s,2.2*s,8);
+    for(let r=0;r<(big?4:2);r++)for(let c=0;c<(big?6:4);c++) g.add(add(new THREE.Mesh(col,stoneD),(c-(big?2.5:1.5))*0.9*s,1.1*s,-1.6*s-r*0.9*s));
+    g.add(add(new THREE.Mesh(new THREE.BoxGeometry((big?6:4)*s,0.3*s,(big?4:2.2)*s),stone),0,2.3*s,-1.6*s-(big?1.35:0.45)*s));
+    if(!big){const ob=new THREE.Mesh(new THREE.ConeGeometry(0.28,4.2,4),stoneD);g.add(add(ob,-3.3,2.1,0.8));}
+    return g;
+  }
+  function palm(){
+    const g=new THREE.Group();
+    g.add(add(new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.13,2.2,5),M(0x7A5A3A)),0,1.1,0));
+    const cr=new THREE.Mesh(new THREE.ConeGeometry(0.9,0.6,6),M(0x3F7A3A)); cr.rotation.x=Math.PI; g.add(add(cr,0,2.3,0));
+    return g;
+  }
+  function balloon(color){
+    const g=new THREE.Group();
+    const env=new THREE.Mesh(new THREE.SphereGeometry(1.5,16,12),new THREE.MeshLambertMaterial({color}));
+    env.scale.set(1,1.2,1); g.add(add(env,0,2.6,0));
+    const skirt=new THREE.Mesh(new THREE.ConeGeometry(0.9,1.1,12,1,true),new THREE.MeshLambertMaterial({color,side:THREE.DoubleSide}));
+    skirt.rotation.x=Math.PI; g.add(add(skirt,0,0.95,0));
+    g.add(add(new THREE.Mesh(new THREE.BoxGeometry(0.6,0.45,0.6),dark),0,0.1,0));
+    return g;
+  }
+  function felucca(){
+    const g=new THREE.Group();
+    const hull=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.35,2.6),M(0x5A3A22)); g.add(add(hull,0,0.1,0));
+    const sg=new THREE.BufferGeometry(); sg.setAttribute('position',new THREE.Float32BufferAttribute([0,0.3,1.0, 0,3.6,-1.4, 0,0.3,-1.2],3)); sg.computeVertexNormals();
+    g.add(new THREE.Mesh(sg,new THREE.MeshLambertMaterial({color:0xFFF8EA,side:THREE.DoubleSide})));
+    return g;
+  }
+
+  // landmarks
+  const kar=temple(true); kar.position.copy(at('karnak')); kar.rotation.y=Math.PI/2; scene.add(kar);
+  const lux=temple(false); lux.position.copy(at('luxor')); lux.rotation.y=Math.PI/2.3; scene.add(lux);
+  // museums
+  const mus=new THREE.Group(); mus.add(add(new THREE.Mesh(new THREE.BoxGeometry(4,1.4,2.6),white),0,0.7,0)); mus.add(add(new THREE.Mesh(new THREE.BoxGeometry(4.4,0.2,3),stoneD),0,1.5,0)); mus.position.copy(at('museum')); scene.add(mus);
+  const mum=new THREE.Group(); mum.add(add(new THREE.Mesh(new THREE.BoxGeometry(2.2,1,1.8),white),0,0.5,0)); mum.add(add(new THREE.Mesh(new THREE.BoxGeometry(2.4,0.18,2),M(0xD9532B)),0,1.08,0)); mum.position.copy(at('mummy')); scene.add(mum);
+  // souq awnings
+  const sq=new THREE.Group(); const aw=[0xD9532B,0xE3A82B,0x16A39A,0x1F3C88,0xC0392B];
+  for(let i=0;i<10;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.12,0.9),M(aw[i%5]));b.rotation.z=0.2;sq.add(add(b,(i%5)*1.0-2,0.9,Math.floor(i/5)*1.6-0.8));sq.add(add(new THREE.Mesh(new THREE.BoxGeometry(0.8,0.8,0.8),white),(i%5)*1.0-2,0.4,Math.floor(i/5)*1.6-0.8));}
+  sq.position.copy(at('souq')); scene.add(sq);
+  // hatshepsut terraces
+  const hat=new THREE.Group();
+  [[7,0.8,4],[5.4,0.8,3],[3.8,0.8,2]].forEach((t,i)=>{hat.add(add(new THREE.Mesh(new THREE.BoxGeometry(t[0],t[1],t[2]),stone),0,0.4+i*0.8,-i*1.4));
+    for(let c=0;c<6;c++)hat.add(add(new THREE.Mesh(new THREE.BoxGeometry(0.25,0.6,0.25),stoneD),(c-2.5)*t[0]/6.5,0.9+i*0.8,t[2]/2-i*1.4));});
+  hat.position.copy(at('hatshepsut')); hat.rotation.y=-Math.PI/2.4; scene.add(hat);
+  // valley of kings: tomb doors
+  const val=new THREE.Group(); for(let i=0;i<4;i++){const dr=new THREE.Mesh(new THREE.BoxGeometry(0.9,1.3,0.4),M(0x2A2018));val.add(add(dr,i*2.2-3.3,0.65,0));val.add(add(new THREE.Mesh(new THREE.BoxGeometry(1.4,0.25,0.6),stoneD),i*2.2-3.3,1.4,0));}
+  val.position.copy(at('valley')); val.rotation.y=-0.4; scene.add(val);
+  // colossi
+  const col=new THREE.Group(); [-1.4,1.4].forEach(x=>{col.add(add(new THREE.Mesh(new THREE.BoxGeometry(1.4,2.6,1.6),stoneD),x,1.3,0));col.add(add(new THREE.Mesh(new THREE.BoxGeometry(0.9,0.9,0.9),stoneD),x,3.0,0.2));col.add(add(new THREE.Mesh(new THREE.BoxGeometry(1.6,0.4,1.9),stone),x,0.2,0));});
+  col.position.copy(at('colossi')); col.rotation.y=-0.3; scene.add(col);
+  // villa
+  const vil=new THREE.Group();
+  vil.add(add(new THREE.Mesh(new THREE.BoxGeometry(5,1.8,3.2),white),0,0.9,0));
+  vil.add(add(new THREE.Mesh(new THREE.BoxGeometry(2.6,1.6,2.4),white),3.4,0.8,-0.6));
+  vil.add(add(new THREE.Mesh(new THREE.SphereGeometry(0.9,14,8,0,Math.PI*2,0,Math.PI/2),M(0xEADFC8)),-1.2,1.8,0));
+  vil.add(add(new THREE.Mesh(new THREE.SphereGeometry(0.7,14,8,0,Math.PI*2,0,Math.PI/2),M(0xEADFC8)),1.4,1.8,0.4));
+  vil.add(add(new THREE.Mesh(new THREE.BoxGeometry(3.2,0.1,1.6),new THREE.MeshPhongMaterial({color:0x3FC1C9,emissive:0x0B5560})),0.2,0.06,2.8));
+  vil.add(add(new THREE.Mesh(new THREE.BoxGeometry(6.8,0.08,6.6),M(0xE6D3AE)),0.6,0.02,0.9));
+  [[-3,3.6],[3.8,3.4],[-3.2,-1.6]].forEach(p=>{const pm=palm();pm.position.set(p[0],0,p[1]);vil.add(pm)});
+  vil.position.copy(at('villa')); vil.position.y+=0.05; vil.rotation.y=0.3; scene.add(vil);
+  // village houses
+  const vg=new THREE.Group(); for(let i=0;i<9;i++){const h=0.8+rnd()*0.8;vg.add(add(new THREE.Mesh(new THREE.BoxGeometry(1+rnd(),h,1+rnd()),M(i%3?0xC9A27A:0xB98B63)),(i%3)*1.8-1.8+rnd()*0.4,h/2,Math.floor(i/3)*1.8-1.8));}
+  vg.position.copy(at('village')); scene.add(vg);
+  // airport
+  const ap=new THREE.Group(); ap.add(add(new THREE.Mesh(new THREE.BoxGeometry(2,0.06,22),M(0x5A5A5E)),0,0.05,0)); ap.add(add(new THREE.Mesh(new THREE.BoxGeometry(5,1.4,2.6),white),-4,0.7,2)); ap.add(add(new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,3,8),white),-6.5,1.5,-1));
+  ap.position.copy(at('airport')); scene.add(ap);
+  // town blocks (instanced)
+  const tb=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),M(0xEFE4CF),170); const dm=new THREE.Object3D(); let ti=0;
+  const avoid=['karnak','luxor','souq','museum','mummy'].map(at);
+  while(ti<170){const x=riverX(0)+4+rnd()*15, z=-38+rnd()*46; if(x<riverX(z)+3.5)continue; if(avoid.some(v=>Math.hypot(v.x-x,v.z-z)<4.2))continue;
+    const h=0.6+rnd()*1.6; dm.position.set(x,height(x,z)+h/2,z); dm.scale.set(0.7+rnd()*0.9,h,0.7+rnd()*0.9); dm.rotation.y=rnd()*0.3; dm.updateMatrix(); tb.setMatrixAt(ti++,dm.matrix);}
+  scene.add(tb);
+  // palms (instanced)
+  const NP=320, trunk=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.07,0.12,2,5),M(0x7A5A3A),NP), crown=new THREE.InstancedMesh(new THREE.ConeGeometry(0.85,0.55,6),M(0x3F7A3A),NP);
+  const allPts=Object.keys(PLACES).map(at); let pi=0, guard=0;
+  while(pi<NP && guard++<20000){const z=-54+rnd()*96, side=rnd()<0.6?-1:1, d=3.8+rnd()*12, x=riverX(z)+side*d;
+    if(side>0 && x<19 && z>-40 && z<10)continue; if(x<-30)continue; if(allPts.some(v=>Math.hypot(v.x-x,v.z-z)<3.2))continue;
+    const y=height(x,z), s=0.8+rnd()*0.6;
+    dm.position.set(x,y+s,z); dm.scale.set(1,s,1); dm.rotation.set(0,0,0); dm.updateMatrix(); trunk.setMatrixAt(pi,dm.matrix);
+    dm.position.set(x,y+2*s+0.1,z); dm.scale.set(1,1,1); dm.rotation.set(Math.PI,rnd()*3,0); dm.updateMatrix(); crown.setMatrixAt(pi,dm.matrix); pi++;}
+  trunk.count=crown.count=pi; scene.add(trunk); scene.add(crown);
+
+  // felucca + balloons
+  const fel=felucca(); const fp=at('felucca'); fel.position.set(fp.x,0,fp.z); scene.add(fel);
+  const fel2=felucca(); fel2.position.set(riverX(14)+0.8,0,14); fel2.rotation.y=Math.PI; scene.add(fel2);
+  const balloons=[]; const bcol=[0xD9532B,0xE3A82B,0x16A39A,0x1F3C88,0xC64B8C];
+  const bp=at('balloon');
+  bcol.forEach((c,i)=>{const b=balloon(c); b.userData={ox:bp.x+(i-2)*3.2+rnd(), oz:bp.z+(i%2)*3-1.5, phase:i*0.7, main:i===0}; b.position.set(b.userData.ox,bp.y,b.userData.oz); b.visible=false; scene.add(b); balloons.push(b);});
+
+  // route
+  let routeMesh=null, mover=null, curve=null, routeT=0;
+  const routeMat=new THREE.MeshBasicMaterial({color:0xE3A82B});
+  const moverMesh=new THREE.Mesh(new THREE.SphereGeometry(0.75,16,12),new THREE.MeshBasicMaterial({color:0xD9532B}));
+  const halo=new THREE.Mesh(new THREE.SphereGeometry(1.3,16,12),new THREE.MeshBasicMaterial({color:0xFFE2A0,transparent:true,opacity:0.35}));
+  moverMesh.add(halo); moverMesh.visible=false; scene.add(moverMesh);
+
+  function buildRoute(ids){
+    if(routeMesh){scene.remove(routeMesh);routeMesh.geometry.dispose();routeMesh=null;}
+    curve=null; moverMesh.visible=false;
+    if(ids.length<2) return;
+    const pts=[];
+    for(let k=0;k<ids.length-1;k++){
+      const a=at(ids[k]), b=at(ids[k+1]); const dist=a.distanceTo(b);
+      const lift=Math.min(10,2+dist*0.18);
+      if(k===0) pts.push(a.clone().setY(a.y+1.2));
+      const m1=a.clone().lerp(b,0.33); m1.y=Math.max(a.y,b.y)+lift;
+      const m2=a.clone().lerp(b,0.66); m2.y=Math.max(a.y,b.y)+lift;
+      pts.push(m1,m2,b.clone().setY(b.y+1.2));
+    }
+    curve=new THREE.CatmullRomCurve3(pts,false,'centripetal');
+    routeMesh=new THREE.Mesh(new THREE.TubeGeometry(curve,Math.max(60,ids.length*50),0.2,6,false),routeMat);
+    routeMesh.geometry.setDrawRange(0,0);
+    scene.add(routeMesh); routeT=0; moverMesh.visible=true;
+  }
+
+  // labels
+  const labelEls={};
+  Object.entries(PLACES).forEach(([id,p])=>{
+    const b=document.createElement('button'); b.className='pin'+(p.home?' home':''); b.innerHTML=`<i></i>${p.name}`;
+    if(['museum','mummy','souq','felucca','village','balloon'].includes(id)) b.classList.add('minor');
+    b.addEventListener('click',()=>{showPlace(id); focusOn([id],true)});
+    labelsEl.appendChild(b); labelEls[id]=b;
+  });
+
+  // camera tween
+  const tgt={pos:new THREE.Vector3(30,95,95),look:new THREE.Vector3(-6,0,-8)};
+  let tweening=false, tw0=null, twStart=0, twDur=1600;
+  function frame(ids,close){
+    const v=ids.map(at), c=new THREE.Vector3(); v.forEach(p=>c.add(p)); c.divideScalar(v.length);
+    let r=0; v.forEach(p=>r=Math.max(r,Math.hypot(p.x-c.x,p.z-c.z)));
+    const dist=Math.max(close?22:28, r*2.3+14);
+    const dir=new THREE.Vector3(0.28,0.82,0.72).normalize();
+    return {look:c.clone().setY(Math.max(0,c.y*0.6)),pos:c.clone().add(dir.multiplyScalar(dist))};
+  }
+  function goTo(f){
+    tw0={pos:camera.position.clone(),look:controls.target.clone()}; tgt.pos.copy(f.pos); tgt.look.copy(f.look);
+    if(reduceMotion){camera.position.copy(f.pos);controls.target.copy(f.look);tweening=false;return;}
+    twStart=performance.now(); tweening=true;
+  }
+  function focusOn(ids,close){goTo(frame(ids,close))}
+
+  let dayIdx=-1, dawnMix=0, dawnTarget=0;
+  function showDay(i){
+    dayIdx=i;
+    const ids = i<0 ? Object.keys(PLACES) : DAYS[i].route;
+    Object.entries(labelEls).forEach(([id,el])=>{
+      el.classList.toggle('on', i>=0 && ids.includes(id) && !PLACES[id].home);
+      el.classList.toggle('dim', i>=0 && !ids.includes(id) && !PLACES[id].home);
+    });
+    buildRoute(i<0?[]:DAYS[i].route);
+    labelsEl.classList.toggle('overview', i<0);
+    dawnTarget = (i>=0 && DAYS[i].dawn)?1:0;
+    balloons.forEach(b=>{b.visible = i===3 || i<0; b.userData.t0=performance.now();});
+    if(i<0) goTo({pos:new THREE.Vector3(18,92,88),look:new THREE.Vector3(-6,0,-8)});
+    else if(DAYS[i].dawn){ const v=at('villa'); goTo({look:new THREE.Vector3(v.x-8,7,v.z-6),pos:new THREE.Vector3(v.x+14,22,v.z+42)}); }
+    else if(ids.length===1) focusOn(ids,true);
+    else focusOn(ids,false);
+  }
+  function replay(){routeT=0; balloons.forEach(b=>b.userData.t0=performance.now());}
+
+  // resize
+  function resize(){const w=box.clientWidth,h=box.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+  new ResizeObserver(resize).observe(box); resize();
+  camera.position.set(18,92,88); controls.target.set(-6,0,-8);
+  controls.addEventListener('start',()=>{tweening=false;});
+
+  const tmp=new THREE.Vector3();
+  let last=performance.now();
+  function loop(now){
+    const dt=Math.min(0.05,(now-last)/1000); last=now;
+    if(tweening){let t=Math.min(1,(now-twStart)/twDur); const e=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+      camera.position.lerpVectors(tw0.pos,tgt.pos,e); controls.target.lerpVectors(tw0.look,tgt.look,e); if(t>=1)tweening=false;}
+    controls.update();
+    // route draw + mover
+    if(curve&&routeMesh){
+      routeT = reduceMotion?1:Math.min(1,routeT+dt/3.2);
+      const total=routeMesh.geometry.index.count; routeMesh.geometry.setDrawRange(0,Math.floor(total*routeT/6)*6);
+      const p=curve.getPointAt(routeT); moverMesh.position.copy(p);
+      halo.scale.setScalar(1+0.25*Math.sin(now/220));
+    }
+    // dawn
+    dawnMix += (dawnTarget-dawnMix)*Math.min(1,dt*2);
+    scene.background.copy(skyDay).lerp(skyDawn,dawnMix); scene.fog.color.copy(scene.background);
+    sun.color.setRGB(1,1-0.25*dawnMix,1-0.5*dawnMix); sun.position.set(40+40*dawnMix,60-42*dawnMix,20);
+    // balloons
+    balloons.forEach((b,k)=>{ if(!b.visible)return; const u=b.userData; const t=reduceMotion?8:(now-(u.t0||now))/1000;
+      const rise=Math.min(1,t/5); b.position.y=height(u.ox,u.oz)+ (dayIdx<0?14:2+rise*(14+k*1.5)) + Math.sin(now/900+u.phase)*0.4;
+      b.position.x=u.ox+ (dayIdx<0?0:rise*4); b.position.z=u.oz - (dayIdx<0?0:rise*3); });
+    // felucca
+    const fz=-9+Math.sin(now/(dayIdx===4?2500:6000))*(dayIdx===4?10:4);
+    fel.position.set(riverX(fz),-0.05+Math.sin(now/500)*0.04,fz); fel.rotation.y=Math.cos(now/(dayIdx===4?2500:6000))>0?Math.PI:0;
+    renderer.render(scene,camera);
+    // labels
+    const w=box.clientWidth,h=box.clientHeight;
+    Object.entries(labelEls).forEach(([id,el])=>{
+      const p=at(id); tmp.set(p.x,p.y+(id==='karnak'?5:id==='valley'?3.2:4),p.z);
+      if(id==='felucca'){tmp.set(fel.position.x,4.2,fel.position.z);}
+      if(id==='balloon' && balloons[0].visible){tmp.copy(balloons[0].position);tmp.y+=5;}
+      tmp.project(camera);
+      const vis=tmp.z<1 && tmp.x>-1.1&&tmp.x<1.1&&tmp.y>-1.1&&tmp.y<1.1;
+      el.style.display=vis?'flex':'none';
+      if(vis){el.style.transform=`translate(${(tmp.x*.5+.5)*w}px,${(-tmp.y*.5+.5)*h}px) translate(-50%,-100%)`;}
+    });
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+  return {showDay,replay};
+}
+
+try{
+  if(!window.THREE||!THREE.OrbitControls) throw new Error('no three');
+  window.map=buildMap();
+}catch(e){
+  const mb=document.getElementById('mapbox');
+  mb.innerHTML='<div class="nogl"><p>The 3D map needs WebGL, which this browser has turned off. Everything about each day is in the card next to it.</p></div>';
+}
+const h=(location.hash||'').match(/^#day([1-8])$/);
+selectDay(h?Number(h[1])-1:-1);
+</script>
+
+</body>
+</html>
